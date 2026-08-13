@@ -1,20 +1,24 @@
 const express = require("express")
 const sequelize = require("./database/connection/db")
 const User = require("./database/models/users.model")
+const appRoute = require("./app.routes")
 const app = express()
 const port = process.env.PORT || 3000
 require("dotenv").config()
 
-async function connection() {
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+app.use(appRoute)
 
+async function connection() {
     try {
         sequelize.authenticate()
         console.log("Connexion réussie")
 
-        sequelize.sync({alter: true})
+        sequelize.sync({ alter: true })
         console.log("Base de donnée synchronisé")
     } catch (error) {
-        console.log("Une erreur s'est produite: ", error)
+        console.log(`Une erreur s'est produite: ${error}`)
     }
 
 }
