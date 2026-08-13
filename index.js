@@ -1,17 +1,23 @@
 const express = require("express")
+const sequelize = require("./database/connection/db")
 const app = express()
 const port = process.env.PORT || 3000
 require("dotenv").config()
 
-app.get("/", (req, res) => {
+async function connection() {
+
     try {
-        res.json({
-            message: "Salut"
-        })
+        sequelize.authenticate()
+        console.log("Connexion réussie")
+
+        sequelize.sync({alter: true})
+        console.log("Base de donnée synchronisé")
     } catch (error) {
-       console.log("Erreur survenus") 
+        console.log("Une erreur s'est produite: ", error)
     }
-})
+
+}
+connection()
 
 app.listen(port, () => {
     try {
@@ -20,4 +26,3 @@ app.listen(port, () => {
         console.log(`Erreur l'ors du démarage du serveur ${error}`)
     }
 })
-
