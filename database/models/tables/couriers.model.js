@@ -15,13 +15,14 @@ const CourierProfile = sequelize.define("CourierProfile",
         drivingLicenseNumber: { type: DataTypes.STRING, allowNull: true, unique: true },
         drivingLicensePhotoUrl: { type: DataTypes.STRING, allowNull: true },
 
-        verificationStatus: { type: DataTypes.ENUM("pending", "under_review", "verified", "rejected") },
+        verificationStatus: { type: DataTypes.ENUM("pending", "under_review", "verified", "rejected"), defaultValue: "pending" },
         rejectionReason: { type: DataTypes.TEXT, allowNull: true },
-        status: { type: DataTypes.ENUM("active", "banned", "suspended", "inactive") }
+        status: { type: DataTypes.ENUM("active", "banned", "suspended", "inactive"), defaultValue: "active" }
     },
     {
         tableName: "courier_profile",
-        timestamps: true
+        timestamps: true,
+        paranoid: true
     }
  )
 
