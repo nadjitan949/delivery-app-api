@@ -1,3 +1,4 @@
+const CourierProfile = require("../../database/models/tables/couriers.model")
 const User = require("../../database/models/tables/users.model")
 const responses = require("../../messages/responses")
 const bcrypt = require("bcrypt")
@@ -6,7 +7,11 @@ async function getAllUsersService(req, res) {
 
     try {
 
-        const users = await User.findAll()
+        const users = await User.findAll({
+            include: {
+                model: CourierProfile
+            }
+        })
 
         const response = {
             success: true,
@@ -32,7 +37,11 @@ async function getOneUserService(req, res) {
     try {
 
         const id = req.params.id
-        const user = await User.findByPk(id)
+        const user = await User.findByPk(id, {
+            include: {
+                model: CourierProfile
+            }
+        })
 
         const response = {
             success: Boolean(user),
