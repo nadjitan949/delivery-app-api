@@ -1,4 +1,4 @@
-const User = require("../../database/models/users.model")
+const User = require("../../database/models/tables/users.model")
 const responses = require("../../messages/responses")
 const bcrypt = require("bcrypt")
 

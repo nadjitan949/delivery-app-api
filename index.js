@@ -1,7 +1,7 @@
 const express = require("express")
 const sequelize = require("./database/connection/db")
-const User = require("./database/models/users.model")
 const appRoute = require("./app.routes")
+const { User, CourierProfile } = require("./database/models/relations/relations.model")
 const app = express()
 const port = process.env.PORT || 3000
 require("dotenv").config()

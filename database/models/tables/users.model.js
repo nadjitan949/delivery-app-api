@@ -1,9 +1,9 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../connection/db");
+const sequelize = require("../../connection/db");
 
 const User = sequelize.define("User", 
     {
-        id: { type: DataTypes.INTEGER, primaryKey: true, unique: true, autoIncrement: true, allowNull: false },
+        id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true, allowNull: false },
         firstname: { type: DataTypes.STRING, allowNull: false },
         lastname: { type: DataTypes.STRING, allowNull: false },
         role: { type: DataTypes.ENUM("supplier", "courier", "admin"), defaultValue: "supplier" },
@@ -13,7 +13,7 @@ const User = sequelize.define("User",
     },
     {
         tableName: "users",
-        timestamps: true
+        timestamps: true,
     }
 )
 
