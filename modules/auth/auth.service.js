@@ -176,4 +176,61 @@ async function forgotPasswodrService(req, res) {
 
 }
 
-module.exports = { registerService, loginService, forgotPasswodrService }
+async function resetPasswordService(req, res) {
+
+    try {
+        const { email, phone, oldPassword } = req.body
+        const identifier = email ? email : phone
+        const user = await User.findOne({ where: email ? { email } : { phone } })
+
+        let response = {}
+        if (!user) {
+            response = {
+                success: false,
+                message: email ? "Cet email n'est associé à aucun compte"
+                    : "Ce numéro de téléphone n'est associé à aucun compte"
+            }
+
+            return res.status(responses.NOT_FOUND).json(response)
+        }
+
+        const isMatch = await bcrypt.compare(oldPassword, user.password)
+        if (!isMatch) {
+            response = {
+                success: false,
+                message: "Le mot de passe ne corresponds pas à l'encien mot de passe"
+            }
+
+            return res.status(responses.BAD_REQUEST).json(response)
+        }
+
+        const otp = await generateOtp()
+        const hashedOtp = await bcrypt.hash(otp, 10)
+        expiresAt = new Date(Date.now() + 5 * 60 * 1000)
+        await Otp.create({
+            sender: identifier,
+            source: "forgot-password",
+            expiresAt,
+            code: hashedOtp
+        })
+
+        response = {
+            success: true,
+            message: email ? "Une code de véridication à été envoté à votre email"
+                : "Un code de vérification a été envoté à votre numéro de téléphone",
+            data: otp
+        }
+
+        return res.status(responses.OK).json(response)
+    } catch (error) {
+        console.log(`Erreur serveur: ${error}`)
+        return res.status(responses.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Une erreur interne est survenue",
+            error: error.message
+        })
+    }
+
+}
+
+module.exports = { registerService, loginService, forgotPasswodrService, resetPasswordService }
