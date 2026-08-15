@@ -17,7 +17,6 @@ const CourierProfile = sequelize.define("CourierProfile",
 
         verificationStatus: { type: DataTypes.ENUM("pending", "under_review", "verified", "rejected"), defaultValue: "pending" },
         rejectionReason: { type: DataTypes.TEXT, allowNull: true },
-        status: { type: DataTypes.ENUM("active", "banned", "suspended", "inactive"), defaultValue: "active" }
     },
     {
         tableName: "courier_profile",

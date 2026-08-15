@@ -20,9 +20,5 @@ courierRoute.put("/update-profile", updateCourierProfileController)
 courierRoute.patch("/under-review/:id", underReviewProfileController)
 courierRoute.patch("/verify/:id", verifyProfileController)
 courierRoute.patch("reject/:id", rejectProfileController)
-courierRoute.patch("/ban/:id", banCourierController)
-courierRoute.patch("/activate/:id", activateCourierController)
-courierRoute.patch("/suspend/:id", suspendCourierController)
-courierRoute.patch("/deactivate/:id", deactivateCourierController)
 
 module.exports = courierRoute

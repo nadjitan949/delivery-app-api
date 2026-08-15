@@ -9,7 +9,9 @@ const User = sequelize.define("User",
         role: { type: DataTypes.ENUM("supplier", "courier", "admin"), defaultValue: "supplier" },
         email: { type: DataTypes.STRING, allowNull: true, unique: true },
         phone: { type: DataTypes.STRING, allowNull: true, unique: true },
-        password: { type: DataTypes.STRING }
+        password: { type: DataTypes.STRING },
+        status: { type: DataTypes.ENUM("active", "banned", "suspended", "inactive"), defaultValue: "active" },
+        reason: { type: DataTypes.TEXT }
     },
     {
         tableName: "users",
