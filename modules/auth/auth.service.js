@@ -3,6 +3,8 @@ const responses = require("../../messages/responses")
 const crypto = require("crypto")
 const bcrypt = require("bcrypt")
 const Otp = require("../../database/models/tables/otps.model")
+const jwt = require("jsonwebtoken")
+require("dotenv").config()
 
 async function registerService(req, res) {
 
@@ -52,4 +54,72 @@ async function registerService(req, res) {
 
 }
 
-module.exports = registerService
+async function loginService(req, res) {
+
+    try {
+
+        const { email, phone, password } = req.body
+        const user = await User.findOne({ where: email ? { email } : { phone } })
+
+        let response = {}
+        if (!user) {
+            response = {
+                success: false,
+                message: email ? "Email ou mot de pass incorrect !"
+                    : "Numéro de téléphone ou mot de passe incorrect !"
+            }
+            return res.status(responses.UNAUTHORIZED).json(response)
+        }
+
+        const isMatch = await bcrypt.compare(password, user.password)
+
+        if (!isMatch) {
+            response = {
+                success: false,
+                message: email ? "Email ou mot de pass incorrect !"
+                    : "Numéro de téléphone ou mot de passe incorrect !"
+            }
+            return res.status(responses.UNAUTHORIZED).json(response)
+        }
+
+        const payload = {
+            id: user.id,
+            role: user.role
+        }
+
+        const accessToken = jwt.sign(
+            payload,
+            process.env.ACCESS_JWT_SECRET,
+            { expiresIn: process.env.ACCESS_JWT_EXPIRE_IN }
+        )
+
+        const refreshToken = jwt.sign(
+            payload,
+            process.env.REFRESH_JWT_SECRET,
+            { expiresIn: process.env.REFRESH_JWT_EXPIRE_IN }
+        )
+        
+
+        response = {
+            success: true,
+            message: "Bienvenus sur votre compte",
+            data: user,
+            accessToken,
+            refreshToken
+        }
+
+        return res.status(responses.ACCEPTED).json(response)
+
+
+    } catch (error) {
+        console.log(`Erreur serveur: ${error}`)
+        return res.status(responses.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Une erreur interne est survenue",
+            error: error.message
+        })
+    }
+
+}
+
+module.exports = { registerService, loginService }
