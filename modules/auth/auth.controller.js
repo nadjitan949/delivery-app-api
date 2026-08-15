@@ -1,4 +1,4 @@
-const { registerService, loginService } = require("./auth.service")
+const { registerService, loginService, forgotPasswodrService } = require("./auth.service")
 
 async function registerController(req, res) {
 
@@ -34,4 +34,21 @@ async function loginController(req, res) {
 
 }
 
-module.exports = { registerController, loginController }
+async function forgotPasswodrController(req, res) {
+
+    try {
+
+        await forgotPasswodrService(req, res)
+        
+    } catch (error) {
+        console.log(`Erreur serveur: ${error}`)
+        return res.status(responses.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Une erreur interne est survenue",
+            error: error.message
+        })
+    }
+    
+}
+
+module.exports = { registerController, loginController, forgotPasswodrController }

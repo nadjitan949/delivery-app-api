@@ -6,6 +6,11 @@ const Otp = require("../../database/models/tables/otps.model")
 const jwt = require("jsonwebtoken")
 require("dotenv").config()
 
+async function generateOtp() {
+    const otp = crypto.randomInt(100000, 999999).toString()
+    return otp
+}
+
 async function registerService(req, res) {
 
     try {
@@ -23,7 +28,7 @@ async function registerService(req, res) {
             }
             return res.status(responses.CONFLICT).json(response)
         }
-        const otp = crypto.randomInt(100000, 999999).toString()
+        const otp = await generateOtp()
         const hashedOtp = await bcrypt.hash(otp, 10)
         const expiresAt = new Date(Date.now() + 5 * 60 * 1000)
 
@@ -98,7 +103,7 @@ async function loginService(req, res) {
             process.env.REFRESH_JWT_SECRET,
             { expiresIn: process.env.REFRESH_JWT_EXPIRE_IN }
         )
-        
+
 
         response = {
             success: true,
@@ -122,4 +127,53 @@ async function loginService(req, res) {
 
 }
 
-module.exports = { registerService, loginService }
+async function forgotPasswodrService(req, res) {
+
+    try {
+
+        const { email, phone, password } = req.body
+        const identifier = email ? email : phone
+        const user = await User.findOne({ where: email ? { email } : { phone } })
+
+        let response = {}
+        if (!user) {
+            response = {
+                success: false,
+                message: email ? "Cet email n'est associé à aucun compte"
+                    : "Ce numéro de téléphone n'est associé à aucun compte"
+            }
+
+            return res.status(responses.NOT_FOUND).json(response)
+        }
+
+        const otp = await generateOtp()
+        const hashedOtp = await bcrypt.hash(otp, 10)
+        expiresAt = new Date(Date.now() + 5 * 60 * 1000)
+        await Otp.create({
+            sender: identifier,
+            source: "forgot-password",
+            expiresAt,
+            code: hashedOtp
+        })
+
+        response = {
+            success: true,
+            message: email ? "Une code de véridication à été envoté à votre email"
+                : "Un code de vérification a été envoté à votre numéro de téléphone",
+            data: otp
+        }
+
+        return res.status(responses.OK).json(response)
+
+    } catch (error) {
+        console.log(`Erreur serveur: ${error}`)
+        return res.status(responses.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Une erreur interne est survenue",
+            error: error.message
+        })
+    }
+
+}
+
+module.exports = { registerService, loginService, forgotPasswodrService }
