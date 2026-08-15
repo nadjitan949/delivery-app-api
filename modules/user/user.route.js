@@ -11,21 +11,30 @@ const {
     suspendUserController,
     deactivateUserController
 } = require("./user.controller")
+const validate = require("../../middleware/validate")
+const {
+    createUserSchema,
+    updateUserSchema,
+    resetUserPasswordSchema,
+    banUserSchema,
+    suspendUserSchema,
+    deactiveUserSchema
+} = require("./user.schema")
 
 const userRoute = express.Router()
 
 userRoute.get("/all", getAllUsersController)
 userRoute.get("/details/:id", getOneUserController)
 
-userRoute.post("/create", createUserController)
+userRoute.post("/create", validate(createUserSchema), createUserController)
 
-userRoute.put("/update/:id", updateUserController)
+userRoute.put("/update/:id", validate(updateUserSchema), updateUserController)
 
-userRoute.patch("/reset-password/:id", resetUserPasswordController)
+userRoute.patch("/reset-password/:id", validate(resetUserPasswordSchema), resetUserPasswordController)
 userRoute.patch("/activate/:id", activeUserController)
-userRoute.patch("/ban/:id", banUserController)
-userRoute.patch("/suspend/:id", suspendUserController)
-userRoute.patch("/deactivate/:id", deactivateUserController)
+userRoute.patch("/ban/:id", validate(banUserSchema), banUserController)
+userRoute.patch("/suspend/:id", validate(suspendUserSchema), suspendUserController)
+userRoute.patch("/deactivate/:id", validate(deactiveUserSchema), deactivateUserController)
 
 userRoute.delete("/delete/:id", deleteUserController)
 

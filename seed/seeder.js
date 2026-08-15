@@ -26,25 +26,30 @@ async function seedDatabaseController(req, res) {
             { firstname: "Selom", lastname: "Adjaho", role: "admin", email: "selom.adjaho@example.com", phone: "90000010", password: hashedPassword }
         ];
 
+        const documentTypes = ["passeport", "identity_card", "residence_card"];
+        const vehicleTypes = ["car", "motorcycle", "tricycle", "bicycle"];
+
         const createdUsers = await User.bulkCreate(usersData, { returning: true });
 
         const couriers = createdUsers.filter(user => user.role === "courier");
 
-        const vehicleTypes = ["car", "motorcycle", "tricycle", "bicycle"];
-
         const courierProfilesData = couriers.map((courier, index) => ({
             userId: courier.id,
-            cniNumber: `CNI-0000${index + 1}`,
-            cniPhotoUrl: `https://example.com/cni/${index + 1}.jpg`,
+
+            documentType: documentTypes[index % documentTypes.length],
+            documentNumber: `DOC-0000${index + 1}`,
+            documentPhotoUrl: `https://example.com/document/${index + 1}.jpg`,
             selfiePhotoUrl: `https://example.com/selfie/${index + 1}.jpg`,
+
             vehicleType: vehicleTypes[index % vehicleTypes.length],
+            vehiculePhotoUrl: `https://example.com/vehicle/${index + 1}.jpg`,
             vehiclePlateNumber: `TG-${1000 + index}`,
             vehiclePlatePhotoUrl: `https://example.com/plate/${index + 1}.jpg`,
             vehicleDescription: "Véhicule en bon état, couleur standard",
             drivingLicenseNumber: vehicleTypes[index % vehicleTypes.length] === "car" ? `PERMIS-000${index + 1}` : null,
             drivingLicensePhotoUrl: vehicleTypes[index % vehicleTypes.length] === "car" ? `https://example.com/permis/${index + 1}.jpg` : null,
-            verificationStatus: "pending",
-            status: "active"
+
+            verificationStatus: "pending"
         }));
 
         await CourierProfile.bulkCreate(courierProfilesData);

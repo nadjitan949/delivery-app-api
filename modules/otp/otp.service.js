@@ -229,6 +229,7 @@ async function resendOtpService(req, res) {
                 success: false,
                 message: "Utilisateur introuvable"
             }
+            return res.status(responses.NOT_FOUND).json(response)
         }
 
         const lastOtp = await Otp.findOne({

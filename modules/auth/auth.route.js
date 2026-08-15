@@ -1,11 +1,18 @@
 const express = require("express")
-const { registerController, loginController, forgotPasswodrController, resetPasswordController } = require("./auth.controller")
+const {
+    registerController,
+    loginController,
+    resetPasswordController,
+    forgotPasswordController
+} = require("./auth.controller")
+const validate = require("../../middleware/validate")
+const { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } = require("./auth.schema")
 
 const authRoute = express.Router()
 
-authRoute.post("/register", registerController)
-authRoute.post("/login", loginController)
-authRoute.post("/forgot-password", forgotPasswodrController)
-authRoute.post("/reset-password", resetPasswordController)
+authRoute.post("/register", validate(registerSchema), registerController)
+authRoute.post("/login", validate(loginSchema), loginController)
+authRoute.post("/forgot-password", validate(forgotPasswordSchema), forgotPasswordController)
+authRoute.post("/reset-password", validate(resetPasswordSchema), resetPasswordController)
 
 module.exports = authRoute

@@ -6,7 +6,7 @@ async function completeCourierProfileService(req, res) {
 
     try {
 
-        const { cniNumber, userId, vehicleType, vehiclePlateNumber, drivingLicenseNumber } = req.body
+        const { documentNumber, userId, vehicleType, vehiclePlateNumber, drivingLicenseNumber } = req.body
         const user = await User.findByPk(userId, {
             include: {
                 model: CourierProfile
@@ -58,8 +58,8 @@ async function completeCourierProfileService(req, res) {
             return res.status(responses.BAD_REQUEST).json(response)
         }
 
-        const existCniNumber = await CourierProfile.findOne({ where: { cniNumber } })
-        if (existCniNumber) {
+        const existdocumentNumber = await CourierProfile.findOne({ where: { documentNumber } })
+        if (existdocumentNumber) {
             response = {
                 success: false,
                 message: "Ce numero d'identité appartient déjà à un autre utilisateur"
@@ -109,7 +109,7 @@ async function updateCourierProfileService(req, res) {
     try {
 
         const id = req.params.id
-        const { cniNumber, vehicleType, vehiclePlateNumber, drivingLicenseNumber } = req.body
+        const { documentNumber, vehicleType, vehiclePlateNumber, drivingLicenseNumber } = req.body
 
         const courierProfile = await CourierProfile.findByPk(id)
 
@@ -122,6 +122,8 @@ async function updateCourierProfileService(req, res) {
             }
             return res.status(responses.NOT_FOUND).json(response)
         }
+
+        const vehicleTypeChanged = vehicleType && vehicleType !== courierProfile.vehicleType
 
         // le type de véhicule final (nouveau si fourni, sinon celui déjà enregistré)
         const finalVehicleType = vehicleType || courierProfile.vehicleType
@@ -144,9 +146,9 @@ async function updateCourierProfileService(req, res) {
             return res.status(responses.BAD_REQUEST).json(response)
         }
 
-        const existCniNumber = cniNumber && cniNumber !== courierProfile.cniNumber
-            && await CourierProfile.findOne({ where: { cniNumber } })
-        if (existCniNumber) {
+        const existdocumentNumber = documentNumber && documentNumber !== courierProfile.documentNumber
+            && await CourierProfile.findOne({ where: { documentNumber } })
+        if (existdocumentNumber) {
             response = {
                 success: false,
                 message: "Ce numero d'identité appartient déjà à un autre utilisateur"
@@ -174,10 +176,35 @@ async function updateCourierProfileService(req, res) {
             return res.status(responses.CONFLICT).json(response)
         }
 
-        await courierProfile.update(req.body)
+        const updateData = { ...req.body }
+
+        // Si le véhicule change, on nettoie les champs devenus obsolètes
+        // et on remet le profil en attente de vérification
+        if (vehicleTypeChanged) {
+
+            if (finalVehicleType === "bicycle") {
+                updateData.vehiclePlateNumber = null
+                updateData.vehiclePlatePhotoUrl = null
+                updateData.drivingLicenseNumber = null
+                updateData.drivingLicensePhotoUrl = null
+            }
+
+            if (finalVehicleType !== "car") {
+                updateData.drivingLicenseNumber = updateData.drivingLicenseNumber ?? null
+                updateData.drivingLicensePhotoUrl = updateData.drivingLicensePhotoUrl ?? null
+            }
+
+            updateData.verificationStatus = "pending"
+            updateData.rejectionReason = null
+        }
+
+        await courierProfile.update(updateData)
+
         response = {
             success: true,
-            message: "Profil livreur mis à jour avec succès",
+            message: vehicleTypeChanged
+                ? "Profil mis à jour. Votre nouveau véhicule est en attente de vérification"
+                : "Profil livreur mis à jour avec succès",
             data: courierProfile
         }
         return res.status(responses.OK).json(response)

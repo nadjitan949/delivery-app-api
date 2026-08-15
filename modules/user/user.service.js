@@ -300,7 +300,7 @@ async function banUserService(req, res) {
             return res.status(responses.BAD_REQUEST).json(response)
         }
 
-        await user.update({ status: "banned", reason })
+        await user.update({ status: "banned", reason: reason ? reason : null })
         response = {
             success: true,
             message: "L'utilisateur a été banni avec succès",
@@ -347,7 +347,7 @@ async function suspendUserService(req, res) {
             return res.status(responses.BAD_REQUEST).json(response)
         }
 
-        await user.update({ status: "suspended", reason })
+        await user.update({ status: "suspended", reason: reason ? reason : null })
         response = {
             success: true,
             message: "L'utilisateur a été suspendu avec succès",
@@ -394,7 +394,7 @@ async function deactivateUserService(req, res) {
             return res.status(responses.BAD_REQUEST).json(response)
         }
 
-        await user.update({ status: "inactive", reason })
+        await user.update({ status: "inactive", reason: reason ? reason : null })
         response = {
             success: true,
             message: "L'utilisateur a été désactivé avec succès",

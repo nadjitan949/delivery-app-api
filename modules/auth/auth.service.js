@@ -76,16 +76,6 @@ async function loginService(req, res) {
             return res.status(responses.UNAUTHORIZED).json(response)
         }
 
-        if (user.status === "banned" || user.status === "suspended" || user.status === "inactive") {
-            response = {
-                success: false,
-                message: user.status === "banned" ? "Votre compte à été banni ! Veuillez contacter l'administrateur"
-                    : user.status === "suspended" ? "Votre compte à été suspendu ! Veuillez contacter l'administrateur"
-                        : "Votre compte est inactif ! Veuillez contacter l'administrateur",
-            }
-            return res.status(responses.UNAUTHORIZED).json(response)
-        }
-
         const isMatch = await bcrypt.compare(password, user.password)
 
         if (!isMatch) {
@@ -93,6 +83,16 @@ async function loginService(req, res) {
                 success: false,
                 message: email ? "Email ou mot de pass incorrect !"
                     : "Numéro de téléphone ou mot de passe incorrect !"
+            }
+            return res.status(responses.UNAUTHORIZED).json(response)
+        }
+
+        if (user.status === "banned" || user.status === "suspended" || user.status === "inactive") {
+            response = {
+                success: false,
+                message: user.status === "banned" ? "Votre compte à été banni ! Veuillez contacter l'administrateur"
+                    : user.status === "suspended" ? "Votre compte à été suspendu ! Veuillez contacter l'administrateur"
+                        : "Votre compte est inactif ! Veuillez contacter l'administrateur",
             }
             return res.status(responses.UNAUTHORIZED).json(response)
         }
