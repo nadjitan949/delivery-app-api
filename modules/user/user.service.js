@@ -225,6 +225,192 @@ async function deleteUserService(req, res) {
             error: error.message
         })
     }
+}
+
+async function activeUserService(req, res) {
+
+    try {
+
+        const id = req.params.id
+        const user = await User.findByPk(id)
+
+        let response
+        if(!user) {
+            response = {
+                success: false,
+                message: "Utilisateur introuvable"
+            }
+            return res.status(responses.NOT_FOUND).json(response)
+        }
+
+        if(user.status === "active") {
+            response = {
+                success: false,
+                message: "L'utilisateur est déjà active",
+                data: user
+            }
+
+            return res.status(responses.BAD_REQUEST).json(response)
+        }
+
+        await user.update({ status: "active", reason: null })
+        response = {
+            success: true,
+            message: "L'utilisateur est maintenant actif",
+            data: user
+        }
+
+        return res.status(responses.OK).json(response)
+
+    } catch (error) {
+        console.log(`Erreur serveur: ${error}`)
+        return res.status(responses.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Une erreur interne est survenue",
+            error: error.message
+        })
+    }
+
+}
+
+async function banUserService(req, res) {
+
+    try {
+
+        const id = req.params.id
+        const { reason } = req.body
+        const user = await User.findByPk(id)
+
+        let response = {}
+        if (!user) {
+            response = {
+                success: false,
+                message: "Utilisateur introuvable"
+            }
+            return res.status(responses.NOT_FOUND).json(response)
+        }
+
+        if (user.status === "banned") {
+            response = {
+                success: false,
+                message: "L'utilisateur est déjà banni",
+                data: user
+            }
+
+            return res.status(responses.BAD_REQUEST).json(response)
+        }
+
+        await user.update({ status: "banned", reason })
+        response = {
+            success: true,
+            message: "L'utilisateur a été banni avec succès",
+            data: user
+        }
+
+        return res.status(responses.OK).json(response)
+
+    } catch (error) {
+        console.log(`Erreur serveur: ${error}`)
+        return res.status(responses.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Une erreur interne est survenue",
+            error: error.message
+        })
+    }
+
+}
+
+async function suspendUserService(req, res) {
+
+    try {
+
+        const id = req.params.id
+        const { reason } = req.body
+        const user = await User.findByPk(id)
+
+        let response = {}
+        if (!user) {
+            response = {
+                success: false,
+                message: "Utilisateur introuvable"
+            }
+            return res.status(responses.NOT_FOUND).json(response)
+        }
+
+        if (user.status === "suspended") {
+            response = {
+                success: false,
+                message: "L'utilisateur est déjà suspendu",
+                data: user
+            }
+
+            return res.status(responses.BAD_REQUEST).json(response)
+        }
+
+        await user.update({ status: "suspended", reason })
+        response = {
+            success: true,
+            message: "L'utilisateur a été suspendu avec succès",
+            data: user
+        }
+
+        return res.status(responses.OK).json(response)
+
+    } catch (error) {
+        console.log(`Erreur serveur: ${error}`)
+        return res.status(responses.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Une erreur interne est survenue",
+            error: error.message
+        })
+    }
+
+}
+
+async function deactivateUserService(req, res) {
+
+    try {
+
+        const id = req.params.id
+        const { reason } = req.body
+        const user = await User.findByPk(id)
+
+        let response = {}
+        if (!user) {
+            response = {
+                success: false,
+                message: "Utilisateur introuvable"
+            }
+            return res.status(responses.NOT_FOUND).json(response)
+        }
+
+        if (user.status === "inactive") {
+            response = {
+                success: false,
+                message: "L'utilisateur est déjà désactivé",
+                data: user
+            }
+
+            return res.status(responses.BAD_REQUEST).json(response)
+        }
+
+        await user.update({ status: "inactive", reason })
+        response = {
+            success: true,
+            message: "L'utilisateur a été désactivé avec succès",
+            data: user
+        }
+
+        return res.status(responses.OK).json(response)
+
+    } catch (error) {
+        console.log(`Erreur serveur: ${error}`)
+        return res.status(responses.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Une erreur interne est survenue",
+            error: error.message
+        })
+    }
 
 }
 
@@ -234,5 +420,9 @@ module.exports = {
     createUserService,
     updateUserService,
     resteUserPasswordService,
-    deleteUserService
+    deleteUserService,
+    activeUserService,
+    banUserService,
+    suspendUserService,
+    deactivateUserService
 }

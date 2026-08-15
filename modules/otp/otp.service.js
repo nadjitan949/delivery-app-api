@@ -270,4 +270,10 @@ async function resendOtpService(req, res) {
 
 }
 
-module.exports = { getAllOtpService, getOneOtpService, deleteOtpService, verifyOtpService, resendOtpService }
+module.exports = {
+    getAllOtpService,
+    getOneOtpService,
+    deleteOtpService,
+    verifyOtpService,
+    resendOtpService
+}

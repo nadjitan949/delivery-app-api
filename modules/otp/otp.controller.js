@@ -1,12 +1,18 @@
 const responses = require("../../messages/responses")
-const { getAllOtpService, getOneOtpService, deleteOtpService, verifyOtpService, resendOtpService } = require("./otp.service")
+const {
+    getAllOtpService,
+    getOneOtpService,
+    deleteOtpService,
+    verifyOtpService,
+    resendOtpService
+} = require("./otp.service")
 
 async function getAllOtpController(req, res) {
 
     try {
 
         await getAllOtpService(req, res)
-        
+
     } catch (error) {
         console.log(`Erreur serveur: ${error}`)
         return res.status(responses.INTERNAL_SERVER_ERROR).json({
@@ -15,7 +21,7 @@ async function getAllOtpController(req, res) {
             error: error.message
         })
     }
-    
+
 }
 
 async function getOneOtpController(req, res) {
@@ -23,7 +29,7 @@ async function getOneOtpController(req, res) {
     try {
 
         await getOneOtpService(req, res)
-        
+
     } catch (error) {
         console.log(`Erreur serveur: ${error}`)
         return res.status(responses.INTERNAL_SERVER_ERROR).json({
@@ -32,7 +38,7 @@ async function getOneOtpController(req, res) {
             error: error.message
         })
     }
-    
+
 }
 
 async function deleteOtpController(req, res) {
@@ -49,7 +55,7 @@ async function deleteOtpController(req, res) {
             error: error.message
         })
     }
-    
+
 }
 
 async function verifyOtpController(req, res) {
@@ -57,7 +63,7 @@ async function verifyOtpController(req, res) {
     try {
 
         await verifyOtpService(req, res)
-        
+
     } catch (error) {
         console.log(`Erreur serveur: ${error}`)
         return res.status(responses.INTERNAL_SERVER_ERROR).json({
@@ -66,7 +72,7 @@ async function verifyOtpController(req, res) {
             error: error.message
         })
     }
-    
+
 }
 
 async function resendOtpController(req, res) {
@@ -74,7 +80,7 @@ async function resendOtpController(req, res) {
     try {
 
         await resendOtpService(req, res)
-        
+
     } catch (error) {
         console.log(`Erreur serveur: ${error}`)
         return res.status(responses.INTERNAL_SERVER_ERROR).json({
@@ -83,7 +89,13 @@ async function resendOtpController(req, res) {
             error: error.message
         })
     }
-    
+
 }
 
-module.exports = { getAllOtpController, getOneOtpController, deleteOtpController, verifyOtpController, resendOtpController }
+module.exports = {
+    getAllOtpController,
+    getOneOtpController,
+    deleteOtpController,
+    verifyOtpController,
+    resendOtpController
+}

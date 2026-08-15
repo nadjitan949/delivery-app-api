@@ -5,7 +5,11 @@ const {
     createUserService,
     updateUserService,
     resteUserPasswordService,
-    deleteUserService
+    deleteUserService,
+    activeUserService,
+    banUserService,
+    suspendUserService,
+    deactivateUserService
 } = require("./user.service")
 
 async function getAllUsersController(req, res) {
@@ -108,11 +112,83 @@ async function deleteUserController(req, res) {
 
 }
 
+async function activeUserController(req, res) {
+
+    try {
+
+        await activeUserService(req, res)
+
+    } catch (error) {
+        console.log(`Erreur serveur: ${error}`)
+        return res.status(responses.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Une erreur interne survenus",
+            error
+        })
+    }
+
+}
+
+async function banUserController(req, res) {
+
+    try {
+
+        await banUserService(req, res)
+
+    } catch (error) {
+        console.log(`Erreur serveur: ${error}`)
+        return res.status(responses.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Une erreur interne survenus",
+            error
+        })
+    }
+
+}
+
+async function suspendUserController(req, res) {
+
+    try {
+
+        await suspendUserService(req, res)
+
+    } catch (error) {
+        console.log(`Erreur serveur: ${error}`)
+        return res.status(responses.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Une erreur interne survenus",
+            error
+        })
+    }
+
+}
+
+async function deactivateUserController(req, res) {
+
+    try {
+
+        await deactivateUserService(req, res)
+
+    } catch (error) {
+        console.log(`Erreur serveur: ${error}`)
+        return res.status(responses.INTERNAL_SERVER_ERROR).json({
+            success: false,
+            message: "Une erreur interne survenus",
+            error
+        })
+    }
+
+}
+
 module.exports = {
     getAllUsersController,
     getOneUserController,
     createUserController,
     updateUserController,
     resetUserPasswordController,
-    deleteUserController
+    deleteUserController,
+    activeUserController,
+    banUserController,
+    suspendUserController,
+    deactivateUserController
 }
