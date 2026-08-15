@@ -76,6 +76,16 @@ async function loginService(req, res) {
             return res.status(responses.UNAUTHORIZED).json(response)
         }
 
+        if (user.status === "banned" || user.status === "suspended" || user.status === "inactive") {
+            response = {
+                success: false,
+                message: user.status === "banned" ? "Votre compte à été banni ! Veuillez contacter l'administrateur"
+                    : user.status === "suspended" ? "Votre compte à été suspendu ! Veuillez contacter l'administrateur"
+                        : "Votre compte est inactif ! Veuillez contacter l'administrateur",
+            }
+            return res.status(responses.UNAUTHORIZED).json(response)
+        }
+
         const isMatch = await bcrypt.compare(password, user.password)
 
         if (!isMatch) {
@@ -104,7 +114,6 @@ async function loginService(req, res) {
             { expiresIn: process.env.REFRESH_JWT_EXPIRE_IN }
         )
 
-
         response = {
             success: true,
             message: "Bienvenus sur votre compte",
@@ -114,7 +123,6 @@ async function loginService(req, res) {
         }
 
         return res.status(responses.ACCEPTED).json(response)
-
 
     } catch (error) {
         console.log(`Erreur serveur: ${error}`)
@@ -127,11 +135,11 @@ async function loginService(req, res) {
 
 }
 
-async function forgotPasswodrService(req, res) {
+async function forgotPasswordService(req, res) {
 
     try {
 
-        const { email, phone, password } = req.body
+        const { email, phone } = req.body
         const identifier = email ? email : phone
         const user = await User.findOne({ where: email ? { email } : { phone } })
 
@@ -146,9 +154,20 @@ async function forgotPasswodrService(req, res) {
             return res.status(responses.NOT_FOUND).json(response)
         }
 
+        if (user.status === "banned" || user.status === "suspended" || user.status === "inactive") {
+            response = {
+                success: false,
+                message: user.status === "banned" ? "Votre compte à été banni ! Veuillez contacter l'administrateur"
+                    : user.status === "suspended" ? "Votre compte à été suspendu ! Veuillez contacter l'administrateur"
+                        : "Votre compte est inactif ! Veuillez contacter l'administrateur",
+            }
+            return res.status(responses.UNAUTHORIZED).json(response)
+        }
+
         const otp = await generateOtp()
         const hashedOtp = await bcrypt.hash(otp, 10)
-        expiresAt = new Date(Date.now() + 5 * 60 * 1000)
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000)
+
         await Otp.create({
             sender: identifier,
             source: "forgot-password",
@@ -179,6 +198,7 @@ async function forgotPasswodrService(req, res) {
 async function resetPasswordService(req, res) {
 
     try {
+
         const { email, phone, oldPassword } = req.body
         const identifier = email ? email : phone
         const user = await User.findOne({ where: email ? { email } : { phone } })
@@ -194,6 +214,16 @@ async function resetPasswordService(req, res) {
             return res.status(responses.NOT_FOUND).json(response)
         }
 
+        if (user.status === "banned" || user.status === "suspended" || user.status === "inactive") {
+            response = {
+                success: false,
+                message: user.status === "banned" ? "Votre compte à été banni ! Veuillez contacter l'administrateur"
+                    : user.status === "suspended" ? "Votre compte à été suspendu ! Veuillez contacter l'administrateur"
+                        : "Votre compte est inactif ! Veuillez contacter l'administrateur",
+            }
+            return res.status(responses.UNAUTHORIZED).json(response)
+        }
+
         const isMatch = await bcrypt.compare(oldPassword, user.password)
         if (!isMatch) {
             response = {
@@ -206,10 +236,11 @@ async function resetPasswordService(req, res) {
 
         const otp = await generateOtp()
         const hashedOtp = await bcrypt.hash(otp, 10)
-        expiresAt = new Date(Date.now() + 5 * 60 * 1000)
+        const expiresAt = new Date(Date.now() + 5 * 60 * 1000)
+
         await Otp.create({
             sender: identifier,
-            source: "forgot-password",
+            source: "reset-password",
             expiresAt,
             code: hashedOtp
         })
@@ -222,6 +253,7 @@ async function resetPasswordService(req, res) {
         }
 
         return res.status(responses.OK).json(response)
+
     } catch (error) {
         console.log(`Erreur serveur: ${error}`)
         return res.status(responses.INTERNAL_SERVER_ERROR).json({
@@ -233,4 +265,9 @@ async function resetPasswordService(req, res) {
 
 }
 
-module.exports = { registerService, loginService, forgotPasswodrService, resetPasswordService }
+module.exports = {
+    registerService,
+    loginService,
+    forgotPasswordService,
+    resetPasswordService
+}
