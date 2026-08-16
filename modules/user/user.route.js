@@ -11,7 +11,7 @@ const {
     suspendUserController,
     deactivateUserController
 } = require("./user.controller")
-const validate = require("../../middleware/validate")
+const validate = require("../../middleware/validator/validate")
 const {
     createUserSchema,
     updateUserSchema,

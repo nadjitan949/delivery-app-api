@@ -6,7 +6,7 @@ async function completeCourierProfileService(req, res) {
 
     try {
 
-        const { documentNumber, userId, vehicleType, vehiclePlateNumber, drivingLicenseNumber } = req.body
+        const { documentNumber, userId, vehiculeType, vehiculePlateNumber, drivingLicenseNumber } = req.body
         const user = await User.findByPk(userId, {
             include: {
                 model: CourierProfile
@@ -40,8 +40,8 @@ async function completeCourierProfileService(req, res) {
             return res.status(responses.CONFLICT).json(response)
         }
 
-        // vehiclePlateNumber obligatoire sauf si vélo
-        if (vehicleType !== "bicycle" && !vehiclePlateNumber) {
+        // vehiculePlateNumber obligatoire sauf si vélo
+        if (vehiculeType !== "bicycle" && !vehiculePlateNumber) {
             response = {
                 success: false,
                 message: "La plaque d'immatriculation est obligatoire pour ce type de véhicule"
@@ -50,7 +50,7 @@ async function completeCourierProfileService(req, res) {
         }
 
         // drivingLicenseNumber obligatoire seulement si voiture
-        if (vehicleType === "car" && !drivingLicenseNumber) {
+        if (vehiculeType === "car" && !drivingLicenseNumber) {
             response = {
                 success: false,
                 message: "Le numéro de permis de conduire est obligatoire pour une voiture"
@@ -58,7 +58,7 @@ async function completeCourierProfileService(req, res) {
             return res.status(responses.BAD_REQUEST).json(response)
         }
 
-        const existdocumentNumber = await CourierProfile.findOne({ where: { documentNumber } })
+        const existdocumentNumber = await CourierProfile.findOne({ where: { documentNumber }, paranoid: false })
         if (existdocumentNumber) {
             response = {
                 success: false,
@@ -67,7 +67,7 @@ async function completeCourierProfileService(req, res) {
             return res.status(responses.CONFLICT).json(response)
         }
 
-        const existPlateNumber = vehiclePlateNumber && await CourierProfile.findOne({ where: { vehiclePlateNumber } })
+        const existPlateNumber = vehiculePlateNumber && await CourierProfile.findOne({ where: { vehiculePlateNumber }, paranoid: false })
         if (existPlateNumber) {
             response = {
                 success: false,
@@ -76,7 +76,7 @@ async function completeCourierProfileService(req, res) {
             return res.status(responses.CONFLICT).json(response)
         }
 
-        const existLicenseNumber = drivingLicenseNumber && await CourierProfile.findOne({ where: { drivingLicenseNumber } })
+        const existLicenseNumber = drivingLicenseNumber && await CourierProfile.findOne({ where: { drivingLicenseNumber }, paranoid: false })
         if (existLicenseNumber) {
             response = {
                 success: false,
@@ -109,7 +109,7 @@ async function updateCourierProfileService(req, res) {
     try {
 
         const id = req.params.id
-        const { documentNumber, vehicleType, vehiclePlateNumber, drivingLicenseNumber } = req.body
+        const { documentNumber, vehiculeType, vehiculePlateNumber, drivingLicenseNumber } = req.body
 
         const courierProfile = await CourierProfile.findByPk(id)
 
@@ -123,14 +123,14 @@ async function updateCourierProfileService(req, res) {
             return res.status(responses.NOT_FOUND).json(response)
         }
 
-        const vehicleTypeChanged = vehicleType && vehicleType !== courierProfile.vehicleType
+        const vehiculeTypeChanged = vehiculeType && vehiculeType !== courierProfile.vehiculeType
 
         // le type de véhicule final (nouveau si fourni, sinon celui déjà enregistré)
-        const finalVehicleType = vehicleType || courierProfile.vehicleType
-        const finalPlateNumber = vehiclePlateNumber !== undefined ? vehiclePlateNumber : courierProfile.vehiclePlateNumber
+        const finalvehiculeType = vehiculeType || courierProfile.vehiculeType
+        const finalPlateNumber = vehiculePlateNumber !== undefined ? vehiculePlateNumber : courierProfile.vehiculePlateNumber
         const finalLicenseNumber = drivingLicenseNumber !== undefined ? drivingLicenseNumber : courierProfile.drivingLicenseNumber
 
-        if (finalVehicleType !== "bicycle" && !finalPlateNumber) {
+        if (finalvehiculeType !== "bicycle" && !finalPlateNumber) {
             response = {
                 success: false,
                 message: "La plaque d'immatriculation est obligatoire pour ce type de véhicule"
@@ -138,7 +138,7 @@ async function updateCourierProfileService(req, res) {
             return res.status(responses.BAD_REQUEST).json(response)
         }
 
-        if (finalVehicleType === "car" && !finalLicenseNumber) {
+        if (finalvehiculeType === "car" && !finalLicenseNumber) {
             response = {
                 success: false,
                 message: "Le numéro de permis de conduire est obligatoire pour une voiture"
@@ -156,8 +156,8 @@ async function updateCourierProfileService(req, res) {
             return res.status(responses.CONFLICT).json(response)
         }
 
-        const existPlateNumber = vehiclePlateNumber && vehiclePlateNumber !== courierProfile.vehiclePlateNumber
-            && await CourierProfile.findOne({ where: { vehiclePlateNumber } })
+        const existPlateNumber = vehiculePlateNumber && vehiculePlateNumber !== courierProfile.vehiculePlateNumber
+            && await CourierProfile.findOne({ where: { vehiculePlateNumber } })
         if (existPlateNumber) {
             response = {
                 success: false,
@@ -180,16 +180,16 @@ async function updateCourierProfileService(req, res) {
 
         // Si le véhicule change, on nettoie les champs devenus obsolètes
         // et on remet le profil en attente de vérification
-        if (vehicleTypeChanged) {
+        if (vehiculeTypeChanged) {
 
-            if (finalVehicleType === "bicycle") {
-                updateData.vehiclePlateNumber = null
-                updateData.vehiclePlatePhotoUrl = null
+            if (finalvehiculeType === "bicycle") {
+                updateData.vehiculePlateNumber = null
+                updateData.vehiculePlatePhotoUrl = null
                 updateData.drivingLicenseNumber = null
                 updateData.drivingLicensePhotoUrl = null
             }
 
-            if (finalVehicleType !== "car") {
+            if (finalvehiculeType !== "car") {
                 updateData.drivingLicenseNumber = updateData.drivingLicenseNumber ?? null
                 updateData.drivingLicensePhotoUrl = updateData.drivingLicensePhotoUrl ?? null
             }
@@ -202,7 +202,7 @@ async function updateCourierProfileService(req, res) {
 
         response = {
             success: true,
-            message: vehicleTypeChanged
+            message: vehiculeTypeChanged
                 ? "Profil mis à jour. Votre nouveau véhicule est en attente de vérification"
                 : "Profil livreur mis à jour avec succès",
             data: courierProfile

@@ -6,7 +6,7 @@ const {
     verifyOtpController,
     resendOtpController
 } = require("./otp.controller")
-const validate = require("../../middleware/validate")
+const validate = require("../../middleware/validator/validate")
 const { verifyOtpSchema, resendOtpSchema } = require("./otp.schema")
 
 const otpRoute = express.Router()

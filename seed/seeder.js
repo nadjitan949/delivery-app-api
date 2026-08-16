@@ -27,7 +27,7 @@ async function seedDatabaseController(req, res) {
         ];
 
         const documentTypes = ["passeport", "identity_card", "residence_card"];
-        const vehicleTypes = ["car", "motorcycle", "tricycle", "bicycle"];
+        const vehiculeTypes = ["car", "motorcycle", "tricycle", "bicycle"];
 
         const createdUsers = await User.bulkCreate(usersData, { returning: true });
 
@@ -41,13 +41,13 @@ async function seedDatabaseController(req, res) {
             documentPhotoUrl: `https://example.com/document/${index + 1}.jpg`,
             selfiePhotoUrl: `https://example.com/selfie/${index + 1}.jpg`,
 
-            vehicleType: vehicleTypes[index % vehicleTypes.length],
-            vehiculePhotoUrl: `https://example.com/vehicle/${index + 1}.jpg`,
-            vehiclePlateNumber: `TG-${1000 + index}`,
-            vehiclePlatePhotoUrl: `https://example.com/plate/${index + 1}.jpg`,
-            vehicleDescription: "Véhicule en bon état, couleur standard",
-            drivingLicenseNumber: vehicleTypes[index % vehicleTypes.length] === "car" ? `PERMIS-000${index + 1}` : null,
-            drivingLicensePhotoUrl: vehicleTypes[index % vehicleTypes.length] === "car" ? `https://example.com/permis/${index + 1}.jpg` : null,
+            vehiculeType: vehiculeTypes[index % vehiculeTypes.length],
+            vehiculePhotoUrl: `https://example.com/vehicule/${index + 1}.jpg`,
+            vehiculePlateNumber: `TG-${1000 + index}`,
+            vehiculePlatePhotoUrl: `https://example.com/plate/${index + 1}.jpg`,
+            vehiculeDescription: "Véhicule en bon état, couleur standard",
+            drivingLicenseNumber: vehiculeTypes[index % vehiculeTypes.length] === "car" ? `PERMIS-000${index + 1}` : null,
+            drivingLicensePhotoUrl: vehiculeTypes[index % vehiculeTypes.length] === "car" ? `https://example.com/permis/${index + 1}.jpg` : null,
 
             verificationStatus: "pending"
         }));

@@ -5,7 +5,7 @@ const {
     resetPasswordController,
     forgotPasswordController
 } = require("./auth.controller")
-const validate = require("../../middleware/validate")
+const validate = require("../../middleware/validator/validate")
 const { registerSchema, loginSchema, forgotPasswordSchema, resetPasswordSchema } = require("./auth.schema")
 
 const authRoute = express.Router()

@@ -2,6 +2,7 @@ const CourierProfile = require("../../database/models/tables/couriers.model")
 const User = require("../../database/models/tables/users.model")
 const responses = require("../../messages/responses")
 const bcrypt = require("bcrypt")
+const { deleteFolderFromCloudinary } = require("../../utils/uploadToCloudinary")
 
 async function getAllUsersService(req, res) {
 
@@ -67,14 +68,16 @@ async function createUserService(req, res) {
     try {
 
         const { email, phone, password } = req.body
-        const existEmail = await User.findOne({ where: { email } })
-        const existPhone = await User.findOne({ where: { phone } })
+        const existUser = await User.findOne({
+            where: email ? { email } : { phone },
+            paranoid: false
+        })
 
         let response = {}
-        if (existEmail || existPhone) {
+        if (existUser) {
             response = {
                 success: false,
-                message: existEmail ?
+                message: email ?
                     "Cet email est déjà utilisé par un autre compte" :
                     "Ce numéro de téléphone est déjà associé à un autre compte"
             }
@@ -119,8 +122,8 @@ async function updateUserService(req, res) {
             })
         }
 
-        const existEmail = email && user.email !== email && await User.findOne({ where: { email } })
-        const existPhone = phone && user.phone !== phone && await User.findOne({ where: { phone } })
+        const existEmail = email && user.email !== email && await User.findOne({ where: { email }, paranoid: false })
+        const existPhone = phone && user.phone !== phone && await User.findOne({ where: { phone }, paranoid: false })
 
         if (existEmail || existPhone) {
             return res.status(responses.CONFLICT).json({
@@ -208,6 +211,8 @@ async function deleteUserService(req, res) {
             return res.status(responses.NOT_FOUND).json(response)
         }
 
+        await deleteFolderFromCloudinary(`couriers/${id}`)
+
         await user.destroy()
 
         response = {
@@ -235,7 +240,7 @@ async function activeUserService(req, res) {
         const user = await User.findByPk(id)
 
         let response
-        if(!user) {
+        if (!user) {
             response = {
                 success: false,
                 message: "Utilisateur introuvable"
@@ -243,7 +248,7 @@ async function activeUserService(req, res) {
             return res.status(responses.NOT_FOUND).json(response)
         }
 
-        if(user.status === "active") {
+        if (user.status === "active") {
             response = {
                 success: false,
                 message: "L'utilisateur est déjà active",

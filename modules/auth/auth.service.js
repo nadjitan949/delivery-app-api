@@ -17,7 +17,10 @@ async function registerService(req, res) {
 
         const { email, phone } = req.body
         const identifier = email ? email : phone
-        const existUser = await User.findOne({ where: email ? { email } : { phone } })
+        const existUser = await User.findOne({
+            where: email ? { email } : { phone },
+            paranoid: false
+        })
 
         let response = {}
         if (existUser) {
