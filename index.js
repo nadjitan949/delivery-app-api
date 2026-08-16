@@ -3,6 +3,7 @@ const sequelize = require("./database/connection/db")
 const appRoute = require("./app.routes")
 const { User, CourierProfile, CourierPricing } = require("./database/models/relations/relations.model")
 const Otp = require("./database/models/tables/otps.model")
+const Policy = require("./database/models/tables/policies.model")
 const app = express()
 const port = process.env.PORT || 3000
 require("dotenv").config()
