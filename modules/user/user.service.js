@@ -3,15 +3,21 @@ const User = require("../../database/models/tables/users.model")
 const responses = require("../../messages/responses")
 const bcrypt = require("bcrypt")
 const { deleteFolderFromCloudinary } = require("../../utils/uploadToCloudinary")
+const CourierPricing = require("../../database/models/tables/pricing.model")
 
 async function getAllUsersService(req, res) {
 
     try {
 
         const users = await User.findAll({
-            include: {
-                model: CourierProfile
-            }
+            include: [
+                {
+                    model: CourierProfile
+                },
+                {
+                    model: CourierPricing
+                }
+            ]
         })
 
         const response = {
@@ -39,9 +45,14 @@ async function getOneUserService(req, res) {
 
         const id = req.params.id
         const user = await User.findByPk(id, {
-            include: {
-                model: CourierProfile
-            }
+            include: [
+                {
+                    model: CourierProfile
+                },
+                {
+                    model: CourierPricing
+                }
+            ]
         })
 
         const response = {
