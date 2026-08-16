@@ -5,6 +5,7 @@ const courierRoute = require("./modules/courier/courier.route")
 const authRoute = require("./modules/auth/auth.route")
 const otpRoute = require("./modules/otp/otp.route")
 const pricingRoute = require("./modules/pricing/pricing.route")
+const policyRoute = require("./modules/policy/policy.route")
 
 const appRoute = express.Router()
 
@@ -14,5 +15,6 @@ appRoute.use("/courier", courierRoute)
 appRoute.use("/auth", authRoute)
 appRoute.use("/otp", otpRoute)
 appRoute.use("/pricing", pricingRoute)
+appRoute.use("/policies", policyRoute)
 
 module.exports = appRoute
