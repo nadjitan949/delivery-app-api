@@ -23,7 +23,22 @@ const CourierProfile = sequelize.define("CourierProfile",
     {
         tableName: "courier_profile",
         timestamps: true,
-        paranoid: true
+        paranoid: true,
+         indexes: [
+            {
+                unique: true,
+                fields: ["userId"],
+                name: "courier_profile_user_id_unique"
+            },
+            {
+                fields: ["verificationStatus"],
+                name: "courier_profile_verification_status_idx"
+            },
+            {
+                fields: ["vehiculeType"],
+                name: "courier_profile_vehicule_type_idx"
+            }
+        ]
     }
  )
 

@@ -13,7 +13,21 @@ const Otp = sequelize.define("Otp",
     },
     {
         tableName: "otps",
-        timestamps: true
+        timestamps: true,
+        indexes: [
+            {
+                fields: ["sender"],
+                name: "otps_sender_idx"
+            },
+            {
+                fields: ["sender", "source"],
+                name: "otps_sender_source_idx"
+            },
+            {
+                fields: ["expiresAt"],
+                name: "otps_expires_at_idx"
+            }
+        ]
     }
 )
 

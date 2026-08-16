@@ -16,7 +16,17 @@ const User = sequelize.define("User",
     {
         tableName: "users",
         timestamps: true,
-        paranoid: true
+        paranoid: true,
+        indexes: [
+            {
+                fields: ["role"],
+                name: "users_role_idx"
+            },
+            {
+                fields: ["status"],
+                name: "users_status_idx"
+            }
+        ]
     }
 )
 
