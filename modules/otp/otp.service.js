@@ -3,6 +3,8 @@ const responses = require("../../messages/responses")
 const bcrypt = require("bcrypt")
 const User = require("../../database/models/tables/users.model")
 const crypto = require("crypto")
+const Policy = require("../../database/models/tables/policies.model")
+const PolicyAcceptance = require("../../database/models/tables/acceptancePolicy.model")
 
 async function getAllOtpService(req, res) {
 
@@ -94,7 +96,7 @@ async function verifyOtpService(req, res) {
 
     try {
 
-        const { email, phone, firstname, lastname, password, code } = req.body
+        const { email, phone, firstname, lastname, password, code, termsAccepted } = req.body
 
         if (!code) {
             return res.status(responses.BAD_REQUEST).json({
@@ -136,7 +138,6 @@ async function verifyOtpService(req, res) {
             return res.status(responses.BAD_REQUEST).json(response)
         }
 
-        // Vérification RÉELLE du code envoyé contre le hash stocké
         const isValidCode = await bcrypt.compare(code, otpRecord.code)
 
         if (!isValidCode) {
@@ -151,6 +152,25 @@ async function verifyOtpService(req, res) {
         switch (otpRecord.source) {
 
             case "register": {
+
+                if (termsAccepted !== true) {
+                    response = {
+                        success: false,
+                        message: "Vous devez accepter les conditions générales pour créer un compte"
+                    }
+                    return res.status(responses.BAD_REQUEST).json(response)
+                }
+
+                const generalPolicy = await Policy.findOne({ where: { type: "generale" } })
+
+                if (!generalPolicy) {
+                    response = {
+                        success: false,
+                        message: "Aucune politique générale n'est configurée pour le moment"
+                    }
+                    return res.status(responses.INTERNAL_SERVER_ERROR).json(response)
+                }
+
                 const hashedPassword = await bcrypt.hash(password, 10)
                 const newUser = await User.create({
                     firstname,
@@ -158,6 +178,12 @@ async function verifyOtpService(req, res) {
                     email: email || null,
                     phone: phone || null,
                     password: hashedPassword
+                })
+
+                await PolicyAcceptance.create({
+                    userId: newUser.id,
+                    policyId: generalPolicy.id,
+                    acceptedAt: new Date()
                 })
 
                 await otpRecord.destroy()

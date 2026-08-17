@@ -1,4 +1,6 @@
+const PolicyAcceptance = require("../../database/models/tables/acceptancePolicy.model")
 const CourierProfile = require("../../database/models/tables/couriers.model")
+const Policy = require("../../database/models/tables/policies.model")
 const CourierPricing = require("../../database/models/tables/pricing.model")
 const User = require("../../database/models/tables/users.model")
 const responses = require("../../messages/responses")
@@ -76,7 +78,7 @@ async function addPricingToCourierService(req, res) {
 
     try {
 
-        const { userId } = req.body
+        const { userId, pricingType } = req.body
         const user = await User.findByPk(userId, {
             include: {
                 model: CourierPricing,
@@ -100,6 +102,7 @@ async function addPricingToCourierService(req, res) {
             }
             return res.status(responses.BAD_REQUEST).json(response)
         }
+        
         if (user.CourierPricing) {
             response = {
                 success: false,
@@ -109,6 +112,22 @@ async function addPricingToCourierService(req, res) {
 
             return res.status(responses.CONFLICT).json(response)
         }
+
+        const policyType = `policy_pricing_${pricingType}`
+        const pricingPolicy = await Policy.findOne({ where: { type: policyType } })
+
+        if (!pricingPolicy) {
+            response = {
+                success: false,
+                message: "Aucune politique n'est configurée pour ce type de tarification"
+            }
+            return res.status(responses.INTERNAL_SERVER_ERROR).json(response)
+        }
+
+        await PolicyAcceptance.findOrCreate({
+            where: { userId: user.id, policyId: pricingPolicy.id },
+            defaults: { acceptedAt: new Date() }
+        })
 
         const pricingTermsAcceptedAt = new Date(Date.now())
 
@@ -191,12 +210,10 @@ async function updatePricingCourierService(req, res) {
 
         const pricingTypeChanged = pricingType && pricingType !== pricing.pricingType
 
-        // Valeurs finales en tenant compte de ce qui est déjà en base (pour les checks "obligatoire")
         const finalPricingType = pricingType || pricing.pricingType
         const finalPricePerMinute = pricePerMinute !== undefined ? pricePerMinute : pricing.pricePerMinute
         const finalPricePerKm = pricePerKm !== undefined ? pricePerKm : pricing.pricePerKm
 
-        // Checks "obligatoire" : on regarde la valeur finale (body + base)
         if (finalPricingType === "per_minute" && !finalPricePerMinute) {
             response = {
                 success: false,
@@ -213,8 +230,6 @@ async function updatePricingCourierService(req, res) {
             return res.status(responses.BAD_REQUEST).json(response)
         }
 
-        // Checks "interdit" : on regarde UNIQUEMENT ce que CETTE requête envoie explicitement,
-        // pas les valeurs déjà en base (sinon un reliquat historique bloquerait des updates innocents)
         if (finalPricingType === "per_minute" && pricePerKm) {
             response = {
                 success: false,
@@ -239,7 +254,6 @@ async function updatePricingCourierService(req, res) {
             return res.status(responses.BAD_REQUEST).json(response)
         }
 
-        // Si le type de tarif change, le livreur doit re-accepter les modalités
         if (pricingTypeChanged && termsAccepted !== true) {
             response = {
                 success: false,
@@ -248,10 +262,28 @@ async function updatePricingCourierService(req, res) {
             return res.status(responses.BAD_REQUEST).json(response)
         }
 
+        if (pricingTypeChanged) {
+
+            const policyType = `policy_pricing_${finalPricingType}`
+            const pricingPolicy = await Policy.findOne({ where: { type: policyType } })
+
+            if (!pricingPolicy) {
+                response = {
+                    success: false,
+                    message: "Aucune politique n'est configurée pour ce type de tarification"
+                }
+                return res.status(responses.INTERNAL_SERVER_ERROR).json(response)
+            }
+
+            await PolicyAcceptance.findOrCreate({
+                where: { userId: user.id, policyId: pricingPolicy.id },
+                defaults: { acceptedAt: new Date() }
+            })
+
+        }
+
         const updateData = { ...req.body }
 
-        // Nettoyage systématique : le champ non pertinent au type final repasse à null,
-        // pour que la base reste toujours cohérente (évite les reliquats qui faussent les checks futurs)
         if (finalPricingType === "per_minute") {
             updateData.pricePerKm = null
         }

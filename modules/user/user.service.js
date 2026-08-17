@@ -95,9 +95,26 @@ async function createUserService(req, res) {
             return res.status(responses.CONFLICT).json(response)
         }
 
+         const generalPolicy = await Policy.findOne({ where: { type: "generale" } })
+ 
+        if (!generalPolicy) {
+            response = {
+                success: false,
+                message: "Aucune politique générale n'est configurée pour le moment"
+            }
+            return res.status(responses.INTERNAL_SERVER_ERROR).json(response)
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10)
 
         const newUser = await User.create({ ...req.body, password: hashedPassword })
+
+          await PolicyAcceptance.create({
+            userId: newUser.id,
+            policyId: generalPolicy.id,
+            acceptedAt: new Date()
+        })
+        
         response = {
             success: true,
             message: "Utilisateur crée avec succès",

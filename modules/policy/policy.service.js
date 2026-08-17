@@ -58,8 +58,21 @@ async function addPolicyService(req, res) {
 
     try {
 
+        const { type } = req.body
+        const policy = await Policy.findOne({ where: { type } })
+
+        let response = {}
+        if (policy) {
+            response = {
+                success: false,
+                message: "Une politique d'utilisation avec ce type existe déjà",
+                data: policy
+            }
+            return res.status(responses.CONFLICT).json(response)
+        }
+
         const newPolicy = await Policy.create({ ...req.body })
-        const response = {
+        response = {
             success: true,
             message: "Plitique d'utilisation ajouté !",
             data: newPolicy
@@ -83,24 +96,37 @@ async function updatePolicyService(req, res) {
     try {
 
         const id = req.params.id
+        const { type } = req.body
+
         const policy = await Policy.findByPk(id)
 
-        let response
+        let response = {}
+
         if (!policy) {
             response = {
                 success: false,
                 message: "Condition introuvable",
                 data: policy
             }
-
             return res.status(responses.NOT_FOUND).json(response)
+        }
+
+        const existType = type && type !== policy.type
+            && await Policy.findOne({ where: { type } })
+
+        if (existType) {
+            response = {
+                success: false,
+                message: "Une politique d'utilisation avec ce type existe déjà"
+            }
+            return res.status(responses.CONFLICT).json(response)
         }
 
         await policy.update({ ...req.body })
 
         response = {
             success: true,
-            message: "Conditions mis à jour avec succes !",
+            message: "Conditions mises à jour avec succès !",
             data: policy
         }
 
@@ -110,7 +136,7 @@ async function updatePolicyService(req, res) {
         console.log(`Erreur serveur: ${error}`)
         return res.status(responses.INTERNAL_SERVER_ERROR).json({
             success: false,
-            message: "Une erreur interne survenus",
+            message: "Une erreur interne est survenue",
             error: error.message
         })
     }
