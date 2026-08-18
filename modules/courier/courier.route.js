@@ -5,10 +5,6 @@ const {
     verifyProfileController,
     rejectProfileController,
     updateCourierProfileController,
-    banCourierController,
-    activateCourierController,
-    suspendCourierController,
-    deactivateCourierController
 } = require("./courier.controller")
 const validate = require("../../middleware/validator/validate")
 const {

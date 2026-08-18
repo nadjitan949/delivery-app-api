@@ -5,9 +5,6 @@ const {
     verifyProfileService,
     rejectProfileService,
     updateCourierProfileService,
-    banCourierService,
-    suspendCourierService,
-    deactivateCourierService
 } = require("./courier.service")
 
 async function completeCourierProfileController(req, res) {

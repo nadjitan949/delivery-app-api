@@ -14,10 +14,10 @@ app.use(appRoute)
 
 async function connection() {
     try {
-        sequelize.authenticate()
+        await sequelize.authenticate()
         console.log("Connexion réussie")
 
-        sequelize.sync({ alter: true })
+        await sequelize.sync({ alter: true })
         console.log("Base de donnée synchronisé")
     } catch (error) {
         console.log(`Une erreur s'est produite: ${error}`)

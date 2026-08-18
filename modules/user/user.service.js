@@ -4,6 +4,8 @@ const responses = require("../../messages/responses")
 const bcrypt = require("bcrypt")
 const { deleteFolderFromCloudinary } = require("../../utils/uploadToCloudinary")
 const CourierPricing = require("../../database/models/tables/pricing.model")
+const Policy = require("../../database/models/tables/policies.model")
+const PolicyAcceptance = require("../../database/models/tables/acceptancePolicy.model")
 
 async function getAllUsersService(req, res) {
 
